@@ -6,8 +6,8 @@ using System;
 
 public class ShiningStar : MonoBehaviour
 {
-    public GameObject starPrefab; // 预制体用于表示星星
-    public string csvFilePath; // CSV文件路径
+    public GameObject starPrefab; // Prefab used to represent stars.
+    public string csvFilePath; // CSV file path.
 
     private List<StarData> starsData = new List<StarData>();
     private List<Constellation> constellations = new List<Constellation>(); 
@@ -18,6 +18,7 @@ public class ShiningStar : MonoBehaviour
     {
         LoadDataFromCSV("Assets/module-omicron/athyg_31_reduced_m10.csv");
         CreateStars();
+        LoadConstellations("Assets/module-omicron/constellationship.fab");
         DrawConstellations();
     }
     void Update()
@@ -27,24 +28,37 @@ public class ShiningStar : MonoBehaviour
 
     void UpdateConstellationLine()
     {
-        // 从第三个元素开始是星星的 hip 编号
+        // The HIP number of stars starts from the third element.
         int k = 0;
+        
         for (int i = 0; i < constellations.Count; i++)
         {
-            // 找到对应的星星对象
+            // Find the corresponding star objects.
             for (int j = 0; j < constellations[i].STAR_PAIRS.Count; j++)
             {
-                k += 1;
+               
                 GameObject starObject_1 = constellations[i].STAR_PAIRS[j].Item1;
 
                 GameObject starObject_2 = constellations[i].STAR_PAIRS[j].Item2;
 
-                if (starObject_1 != null && starObject_1 != null)
+                if (starObject_1 != null && starObject_2 != null)
                 {
-                    // 在星星之间创建连接线或其他表示星座的几何图形
-                    LineRenderers[k].SetPosition(0, starObject_1.transform.position);
-                    LineRenderers[k].SetPosition(1, starObject_2.transform.position);
-                    //LineRenderers[k].(starObject_1.transform.position, starObject_2.transform.position);
+                     k += 1;
+                    Debug.Log("updating constellation line");
+                    Debug.Log("LineRenderers length:"+LineRenderers.Count);
+                    Debug.Log("K:" + k);
+                    // Create connecting lines or other geometric shapes to represent constellations between stars.
+                    //LineRenderers[k].material = new Material(Shader.Find("Standard"));
+                    //LineRenderers[k].material.color = Color.white;
+                    if (k < LineRenderers.Count)
+                    {
+                        Debug.Log("LineRenderers postions1:" + starObject_1.transform.position);
+                        Debug.Log("LineRenderers postions2:" + starObject_2.transform.position);
+                        LineRenderers[k].SetPosition(0, starObject_1.transform.position);
+                        LineRenderers[k].SetPosition(1, starObject_2.transform.position);
+                        //LineRenderers[k].(starObject_1.transform.position, starObject_2.transform.position);
+                    }
+
                 }
             }
         }
@@ -62,12 +76,12 @@ public class ShiningStar : MonoBehaviour
             Debug.Log("Start loading csv file");
             string[] csvLines = File.ReadAllLines(csvFilePath);
 
-            for (int i = 1; i < csvLines.Length; i++) // 从第二行开始读取，第一行通常是标题
+            for (int i = 1; i < csvLines.Length; i++) // Read from the second line; the first line is typically the header.
             {
                 string[] values = csvLines[i].Split(',');
 
                 Debug.Log("Start spliting csv file");
-                // 解析CSV数据并创建StarData对象
+                // Parse the CSV data and create StarData objects.
                 StarData star = new StarData();
                 Debug.Log("Start loading ID");
                 star.ID = int.Parse(values[0]);
@@ -79,19 +93,19 @@ public class ShiningStar : MonoBehaviour
                 {
                     star.HIP = int.Parse(values[1]);
                     star.DIST = float.Parse(values[2]);
-                    star.X0 = float.Parse(values[3]);
-                    star.Y0 = float.Parse(values[4]);
-                    star.Z0 = float.Parse(values[5]);
+                    star.X0 = float.Parse(values[3])*5;
+                    star.Y0 = float.Parse(values[4])*5;
+                    star.Z0 = float.Parse(values[5])*5;
                     star.ABSMAG = float.Parse(values[6]);
                     star.MAG = float.Parse(values[7]);
-                    star.VX = float.Parse(values[8]);
-                    star.VY = float.Parse(values[9]);
-                    star.VZ = float.Parse(values[10]);
+                    star.VX = float.Parse(values[8]) * 1.02269E-6f;
+                    star.VY = float.Parse(values[9]) * 1.02269E-6f;
+                    star.VZ = float.Parse(values[10]) * 1.02269E-6f;
                     star.SPECT = values[11];
                 }
 
-                // 检查并添加有效的星星数据
-                if ((10 * 3.262 < star.DIST) && (star.DIST < 25 * 3.262) && !float.IsNaN(star.HIP) && !string.IsNullOrEmpty(star.SPECT) && !float.IsNaN(star.X0) && !float.IsNaN(star.Y0) && !float.IsNaN(star.Z0))
+                // Check and add valid star data.
+                if ((10.326 < star.DIST) && (star.DIST < 30 * 3.262) && !float.IsNaN(star.HIP) && !string.IsNullOrEmpty(star.SPECT) && !float.IsNaN(star.X0) && !float.IsNaN(star.Y0) && !float.IsNaN(star.Z0))
                 {
 
                     starsData.Add(star);
@@ -99,69 +113,7 @@ public class ShiningStar : MonoBehaviour
                 }
             }
 
-            string[] constellationLines = File.ReadAllLines("Assets/module-omicron/constellationship.fab");
 
-            Debug.Log("successful loading the constellation file");
-            Constellation constellation = new Constellation();
-
-
-            foreach (var constellationLine in constellationLines)
-            {
-                string[] constellationData = System.Text.RegularExpressions.Regex.Split(constellationLine, @"\s+");
-                //string[] constellationData = constellationLine.Split(' ');
-
-
-                // 解析星座数据
-                Debug.Log("constellationData.Length: " + constellationData.Length);
-                Debug.Log(constellationData[0]);
-                Debug.Log(constellationData[1]);
-                string constellationName = constellationData[0];
-                int starCount = int.Parse(constellationData[1]);
-
-                constellation.NAME = constellationName;
-
-                constellation.PAIR_NUMBER = starCount;
-                Debug.Log("successful parsing the constellation file");
-
-                // 从第三个元素开始是星星的 hip 编号
-                for (int i = 2; i < constellationData.Length-1; i += 2)
-                {
-                    Debug.Log("i: " + i + ", constellationData.Length: " + constellationData.Length);
-
-                    //Debug.Log(constellationData.Length);
-                    int hipNumber_1 = int.Parse(constellationData[i]);
-                    //Debug.LogError("Index out of bounds while parsing constellation data.");
-                    //Debug.Log(i + 1);
-                    int hipNumber_2 = int.Parse(constellationData[i + 1]);
-                    
-                    //Debug.Log("successful load the hip");
-                    // 找到对应的星星对象
-                    GameObject starObject_1 = FindStarByHIP(hipNumber_1);
-
-                    GameObject starObject_2 = FindStarByHIP(hipNumber_2);
-
-                    //Debug.Log("successful find the star by hip");
-
-                    Tuple<GameObject, GameObject> starpair = Tuple.Create(starObject_1, starObject_2);
-
-                    constellation.STAR_PAIRS.Add(starpair);
-
-                    //Debug.Log("successful add the star pair");
-
-                    //if (starObject_1 != null && starObject_1 != null)
-                    //{
-                    // 在星星之间创建连接线或其他表示星座的几何图形
-                    //DrawConstellationLine(starObject_1.transform.position, starObject_2.transform.position);
-                    //}
-                    if(i >= constellationData.Length - 2)
-                    {
-                        Debug.Log("Index out of bounds while parsing constellation data.");
-                        break;  // 终止循环或采取其他适当的措施
-                    }
-                }
-                Debug.Log("successful add the constellation");
-                constellations.Add(constellation);
-            }
         }
         catch (Exception e)
         {
@@ -173,29 +125,105 @@ public class ShiningStar : MonoBehaviour
     {
         foreach (var starData in starsData)
         {
-            // 根据StarData创建星星对象
+            // Create star objects based on StarData.
             GameObject starObject = Instantiate(starPrefab, new Vector3(starData.X0, starData.Y0, starData.Z0), Quaternion.identity);
             starObject.name = $"Star_{starData.HIP}";
 
-            // 根据亮度设置星星的大小
+            // Set star size based on brightness.
             float starSize = Mathf.Clamp(1.0f / starData.ABSMAG, 0.1f, 10.0f);
             starObject.transform.localScale = new Vector3(starSize, starSize, starSize);
 
-            // 根据光谱类型设置星星的颜色
+            // Set star color based on spectral type.
             Color starColor = GetColorBySpectralType(starData.SPECT);
             starObject.GetComponent<Renderer>().material.color = starColor;
 
-            // 将星星对象放置在场景中
+            //Place the star objects in the scene.
             starObject.transform.SetParent(transform);
 
             starObject.AddComponent<StarOrbit>().InitializeOrbit(starData, transform);
         }
     }
 
+    void LoadConstellations(string fabFilePath)
+    {
+        string[] constellationLines = File.ReadAllLines(fabFilePath);
+
+        Debug.Log("successful loading the constellation file");
+
+
+
+        foreach (var constellationLine in constellationLines)
+        {
+            string[] constellationData = System.Text.RegularExpressions.Regex.Split(constellationLine, @"\s+");
+            //string[] constellationData = constellationLine.Split(' ');
+            Constellation constellation = new Constellation();
+
+            // Parse constellation data.
+            //Debug.Log("constellationData.Length: " + constellationData.Length);
+            //Debug.Log(constellationData[0]);
+            //Debug.Log(constellationData[1]);
+            string constellationName = constellationData[0];
+            int starCount = int.Parse(constellationData[1]);
+
+            constellation.NAME = constellationName;
+
+            constellation.PAIR_NUMBER = starCount;
+            Debug.Log("successful parsing the constellation file");
+
+            //The HIP (Hipparcos) number of stars begins from the third element.
+            for (int i = 2; i < constellationData.Length - 1; i += 2)
+            {
+                Debug.Log("i: " + i + ", constellationData.Length: " + constellationData.Length);
+
+                //Debug.Log(constellationData.Length);
+                int hipNumber_1 = int.Parse(constellationData[i]);
+                //Debug.LogError("Index out of bounds while parsing constellation data.");
+                //Debug.Log(i + 1);
+                int hipNumber_2 = int.Parse(constellationData[i + 1]);
+
+                //Debug.Log("successful load the hip");
+                //Find the corresponding star objects.
+                Debug.Log("hipNumber_1" + hipNumber_1);
+                Debug.Log("hipNumber_2" + hipNumber_2);
+                GameObject starObject_1 = FindStarByHIP(hipNumber_1);
+
+                GameObject starObject_2 = FindStarByHIP(hipNumber_2);
+
+                //Debug.Log("successful find the star by hip");
+                if (starObject_1 != null && starObject_1 != null)
+                {
+                    Debug.Log("successful add the star pair");
+                    Tuple<GameObject, GameObject> starpair = Tuple.Create(starObject_1, starObject_2);
+
+                    constellation.STAR_PAIRS.Add(starpair);
+                }
+
+
+
+                //if (starObject_1 != null && starObject_1 != null)
+                //{
+                //Create connecting lines or other geometric shapes representing constellations between stars.
+                //DrawConstellationLine(starObject_1.transform.position, starObject_2.transform.position);
+                //}
+                //if (i >= constellationData.Length - 2)
+                //{
+                //Debug.Log("Index out of bounds while parsing constellation data.");
+                //  break;  // 
+                //}
+            }
+            Debug.Log("pair length:"+ constellation.STAR_PAIRS.Count);
+            Debug.Log("successful add the constellation");
+            if (constellation.STAR_PAIRS.Count == starCount)
+            {
+                constellations.Add(constellation);
+            }
+            
+        }
+    }
+
     Color GetColorBySpectralType(string spectralType)
     {
-        // 根据光谱类型返回颜色
-        // 这里简单示例，您可能需要创建更详细的颜色映射表
+        // According to the spectral type, return the color.
         switch (spectralType[0])
         {
             case 'O': return Color.blue;
@@ -203,7 +231,7 @@ public class ShiningStar : MonoBehaviour
             case 'A': return Color.white;
             case 'F': return Color.yellow;
             case 'G': return Color.yellow;
-            case 'K': return new Color(1.0f, 0.5f, 0.0f); // 橙色
+            case 'K': return new Color(1.0f, 0.5f, 0.0f); 
             case 'M': return Color.red;
             default: return Color.gray;
         }
@@ -211,21 +239,23 @@ public class ShiningStar : MonoBehaviour
 
     void DrawConstellations()
     {
-        // 读取星座文件
+        // Read the constellation file.
 
-            // 从第三个元素开始是星星的 hip 编号
-            for (int i = 0; i < constellations.Count; i++)
+        // The HIP number of the stars starts from the third element.
+        for (int i = 0; i < constellations.Count; i++)
             {
-            // 找到对应的星星对象
+            // You're finding the corresponding star objects based on the HIP numbers in the constellation data.
             for (int j = 0; j < constellations[i].STAR_PAIRS.Count; j++)
             {
                 GameObject starObject_1 = constellations[i].STAR_PAIRS[j].Item1;
 
                 GameObject starObject_2 = constellations[i].STAR_PAIRS[j].Item2;
 
-                if (starObject_1 != null && starObject_1 != null)
+                if (starObject_1 != null && starObject_2 != null)
                 {
-                    // 在星星之间创建连接线或其他表示星座的几何图形
+                    // You are attempting to draw lines or other geometric shapes between stars to represent constellations.
+                    Debug.Log("successfull draw lines");
+                    Debug.Log("star1 position: "+starObject_1.transform.position+ "star2 position: "+starObject_2.transform.position);
                     DrawConstellationLine(starObject_1.transform.position, starObject_2.transform.position);
                 }
             }
@@ -235,12 +265,12 @@ public class ShiningStar : MonoBehaviour
 
     GameObject FindStarByHIP(int hipNumber)
     {
-        // 根据 hip 编号查找星星对象
+        //  find the corresponding GameObject in the scene using the HIP (Henry Draper Catalog) number.
         foreach (var starData in starsData)
         {
             if (starData.HIP == hipNumber)
             {
-                return GameObject.Find($"Star_{hipNumber}"); // 此处假设星星对象的名称类似于 "Star_12345"
+                return GameObject.Find($"Star_{hipNumber}"); 
             }
         }
 
@@ -249,17 +279,35 @@ public class ShiningStar : MonoBehaviour
 
     void DrawConstellationLine(Vector3 starPosition_1, Vector3 starPosition_2)
     {
-        // 在星星位置创建连接线或其他表示星座的几何图形
-        // 这可以使用 LineRenderer 组件或其他 Unity 组件来实现
-        // 此处仅做示例，具体实现取决于您的需求
+        // draw lines or geometric shapes between stars to represent constellations. 
         //GameObject constellationLine = new GameObject("ConstellationLine");
         //constellationLine.transform.position = starPosition_1;
         //constellationLine.AddComponent<LineRenderer>();
-        LineRenderer lineRenderer = GetComponent<LineRenderer>();
-        LineRenderers.Add(lineRenderer);
-        lineRenderer.positionCount = 2;
-        lineRenderer.SetPosition(0, starPosition_1);
-        lineRenderer.SetPosition(1, starPosition_2);
+        Debug.Log("successfull draw lines");
+        //LineRenderer lineRenderer = gameObject.AddComponent<LineRenderer>();
+        //Debug.Log(lineRenderer);
+        //LineRenderer lineRenderer = GetComponent<LineRenderer>();
+        GameObject constellationLine = new GameObject("ConstellationLine");
+        LineRenderer lineRenderer = constellationLine.AddComponent<LineRenderer>();
+        lineRenderer.material = new Material(Shader.Find("Standard"));
+        lineRenderer.material.color = Color.white;
+
+
+        //LineRenderer lineRenderer = gameObject.AddComponent<LineRenderer>();
+        //lineRenderer.material = new Material(Shader.Find("Sprites/Default"));
+        //lineRenderer.material.color = Color.white;
+
+        if (lineRenderer != null)
+        {
+            Debug.Log("line renderer is not null");
+            
+            lineRenderer.positionCount = 2;
+            lineRenderer.SetPosition(0, starPosition_1);
+            lineRenderer.SetPosition(1, starPosition_2);
+
+            LineRenderers.Add(lineRenderer);
+        }
+
     }
 
 }
@@ -287,8 +335,8 @@ public class Constellation
 public class StarOrbit : MonoBehaviour
 {
     private StarData starData;
-    private Transform center; // 物体的Transform，即星星绕着的中心点
-    private LineRenderer constellationLineRenderer; // 用于绘制星座连接线的LineRenderer
+    private Transform center; // The object's Transform, which is the center around which the star rotates.
+    private LineRenderer constellationLineRenderer; // LineRenderer used for drawing constellation connecting lines.
 
     public void InitializeOrbit(StarData starData, Transform center)
     {
@@ -298,10 +346,10 @@ public class StarOrbit : MonoBehaviour
 
     void Update()
     {
-        // 计算每帧旋转的角度
+        // Calculate the angle of rotation per frame.
         float rotationSpeed = Mathf.Sqrt(starData.VX * starData.VX + starData.VY * starData.VY + starData.VZ * starData.VZ);
 
-        // 根据速度分量旋转星星
+        // Rotate the star based on velocity components.
         transform.RotateAround(center.position, new Vector3(starData.VX, starData.VY, starData.VZ), rotationSpeed * Time.deltaTime);
 
         //UpdateConstellationLine();
@@ -311,7 +359,7 @@ public class StarOrbit : MonoBehaviour
     {
         if (constellationLineRenderer.enabled)
         {
-            // 设置连接线的起始点和终点
+            //
             constellationLineRenderer.SetPosition(0, center.position);
             constellationLineRenderer.SetPosition(1, transform.position);
         }

@@ -1,16 +1,19 @@
 ﻿<Properties StartupConfiguration="{B341E4C4-7CC0-4BCE-1C96-646785ECE48C}|">
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/module-omicron/constellationship.fab">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/module-omicron/constellation_names.eng.fab">
     <Files>
-      <File FileName="Assets/module-omicron/ShiningStar.cs" Line="139" Column="51" />
+      <File FileName="Assets/module-omicron/ShiningStar.cs" Line="246" Column="46" />
       <File FileName="Assets/module-omicron/athyg_31_reduced_m10.csv" Line="1" Column="1" />
-      <File FileName="Assets/module-omicron/constellationship.fab" Line="1" Column="1" />
+      <File FileName="Assets/module-omicron/constellationship.fab" Line="88" Column="128" />
+      <File FileName="Assets/module-omicron/constellation_names.eng.fab" Line="1" Column="1" />
     </Files>
     <Pads>
       <Pad Id="ProjectPad">
         <State name="__root__">
           <Node name="omicron-unity" expanded="True">
             <Node name="Assets" expanded="True">
-              <Node name="module-omicron" expanded="True" selected="True" />
+              <Node name="module-omicron" expanded="True">
+                <Node name="ShiningStar.cs" selected="True" />
+              </Node>
             </Node>
           </Node>
         </State>
